@@ -1,33 +1,43 @@
 {% set name = "freetype-py" %}
-{% set version = "2.2.0" %}
+{% set version = "2.5.1" %}
 
 package:
   name: {{ name|lower }}
   version: {{ version }}
 
 source:
-  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.zip
-  sha256: cf43716bc5246cd54a64b2238b942e8dc80b79eda92f814c720286fa6fab387a
+  url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.zip
+  sha256: cfe2686a174d0dd3d71a9d8ee9bf6a2c23f5872385cf8ce9f24af83d076e2fbd
 
 build:
-  noarch: python
   number: 0
-  # Note: --no-deps is currently required due to https://github.com/conda/conda-build/issues/3254
-  # Once resolved, it should be removed.
-  script: {{ PYTHON }} -m pip install . --no-deps -vv
+  skip: true  # [py<37]
+  script: {{ PYTHON }} -m pip install . --no-deps --no-build-isolation -vv
 
 requirements:
   host:
-    - python
     - pip
-    - setuptools_scm
+    - python
+    - setuptools >=42
+    - setuptools_scm >=3.4
+    - tomli
+    - freetype {{ freetype }}
   run:
     - python
     - freetype
 
 test:
+  source_files:
+    - tests
+    - examples
+  requires:
+    - pip
+    - pytest
   imports:
     - freetype
+  commands:
+    - pip check
+    - pytest tests/smoke_test.py tests/vf_test.py -v
 
 about:
   home: https://github.com/rougier/freetype-py
